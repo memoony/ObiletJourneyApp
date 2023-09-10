@@ -1,0 +1,47 @@
+﻿@using ObiletJourney.Core.Entities.Bus
+
+@model List<BusJourneyResponse>
+@{
+    ViewData["Title"] = "BusJourney";
+    <link rel="stylesheet" href="~/css/busjourney.css" />
+}
+
+<div class="container">
+    <div class="header">
+        <div class="back-button">
+            <span>&#8592;</span> <a href="~/home/" style="color: white">Geri</a>
+        </div>
+        <div class="title">
+            @Model.Select(x => x.OriginLocation).FirstOrDefault() - @Model.Select(x => x.DestinationLocation).FirstOrDefault()
+        </div>
+    </div>
+    <div class="content">
+        @*<div class="date">10.09.2023</div>*@
+        @foreach (var item in Model)
+        {
+            <div class="card">
+                <div class="row">
+                    <div class="col-6">
+                        <div class="card-title">Kalkış</div>
+                        @if (item.Journey.Departure.HasValue) 
+                        {
+                            <div class="card-time">@item.Journey.Departure.Value.ToString("HH:mm")</div>
+                        }
+                        <div class="card-location">@item.Journey.Origin</div>
+                    </div>
+                    <div class="col-6">
+                        <div class="card-title">Varış</div>
+                        @if (item.Journey.Arrival.HasValue)
+                        {
+                            <div class="card-time">@item.Journey.Arrival.Value.ToString("HH:mm")</div>
+                        }
+                        <div class="card-location">@item.Journey.Destination</div>
+
+                        <div class="price">@item.Journey.OriginalPrice @item.Journey.Currency</div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+

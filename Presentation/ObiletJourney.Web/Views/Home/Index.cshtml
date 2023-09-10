@@ -1,0 +1,129 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row">
+                <div class="col-md-6 mx-auto">
+                    <div class="card rounded-0">
+                        <div class="card-header">
+                            <h3 class="mb-0">Biletini Bul</h3>
+                        </div>
+
+                        <div class="card-body">
+                            <form action="/Home/BusJourney">
+                                <div class="form-group">
+                                    <label for="originId">Nereden</label>
+                                    @Html.DropDownList("originId", (SelectList)ViewBag.busLocationList, new { @id = "originId", @class = "form-control" })
+                                </div>
+                                <div class="form-group">
+                                    <label for="destinationId">Nereye</label>
+                                    @Html.DropDownList("destinationId", (SelectList)ViewBag.busLocationList, new { @id = "destinationId", @class = "form-control" })
+                                </div>
+                                <button id="yerDegistirButton" class="btn btn-primary" onclick="changeLocation()">Değiştir</button>
+
+                                <div class="form-group">
+                                    <label for="departureDate">Tarih</label>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <input type="datetime-local" class="form-control" id="departureDate" name="departureDate">
+                                        </div>
+                                        <div class="col-md-6 text-right">
+                                            <button class="btn btn-primary" id="todayButton" onclick="getToday()">Bugün</button>
+                                            <button class="btn btn-primary" id="tomorrowButton" onclick="getTomorrow()">Yarın</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <br />
+                                <div class="text-center">
+                                    <button class="btn btn-primary">Bileti Bul</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        let today = moment().format("YYYY-MM-DDTHH:mm"); // Gönderilecek modeldeki formata göre bugünün tarihi alınıyor.
+        let tomorrow = moment().add(1, 'days').format("YYYY-MM-DDTHH:mm"); // Gönderilecek modeldeki formata göre yarının tarihi alınıyor.
+
+        $(document).ready(function () {
+            $("#departureDate").attr("min", today); // Bugünün tarihinden daha geri tarih seçilmemesi sağlanıyor.
+
+            // Eğer localStorage'da kaydedilmiş değer yoksa, varsayılan olarak yarının tarihi kullanılıyor.
+            if (!localStorage.getItem("departureDate")) {
+                $("#departureDate").val(tomorrow);
+                localStorage.setItem("departureDate", tomorrow);
+            } else {
+                // Eğer localStorage'da kaydedilmiş bir tarih varsa, onu kullan.
+                $("#departureDate").val(localStorage.getItem("departureDate"));
+            }
+
+            // Aynı değerlerin seçilmesi durumu kontrol ediliyor.
+            var originIdDropdown = document.getElementById("originId");
+            var destinationIdDropdown = document.getElementById("destinationId");
+
+            originIdDropdown.addEventListener("change", function () {
+                checkDuplicateSelections();
+            });
+
+            destinationIdDropdown.addEventListener("change", function () {
+                checkDuplicateSelections();
+            });
+
+            function checkDuplicateSelections() {
+                var selectedoriginId = originIdDropdown.value;
+                var selecteddestinationId = destinationIdDropdown.value;
+
+                if (selectedoriginId === selecteddestinationId) {
+                    alert("Lütfen farklı bir değer seçin.");
+
+                    originIdDropdown.selectedIndex = 0;
+                    destinationIdDropdown.selectedIndex = 1;
+                }
+            }
+
+            $('#originId').val(localStorage.getItem("originId")).trigger('change');
+            $('#destinationId').val(localStorage.getItem("destinationId")).trigger('change');
+        });
+
+        // Bugün butonuna basıldığında o günün tarihi set ediliyor ve localStorage'a kaydediliyor.
+        function getToday() {
+            $("#departureDate").val(today);
+            localStorage.setItem("departureDate", today);
+        }
+
+        // Yarın butonuna basıldığında yarının tarihi set ediliyor ve localStorage'a kaydediliyor.
+        function getTomorrow() {
+            $("#departureDate").val(tomorrow);
+            localStorage.setItem("departureDate", tomorrow);
+        }
+
+        // Nereden, nereye ve tarih seçenekleri her değiştiğinde localStorage'a kaydediliyor.
+        $('#originId').change(function () {
+            localStorage.setItem("originId", this.value);
+        });
+        $('#destinationId').change(function () {
+            localStorage.setItem("destinationId", this.value);
+        });
+        $('#departureDate').change(function () {
+            localStorage.setItem("departureDate", this.value);
+        });
+
+        // Yer değiştirme işleminin yapıldığı fonksiyon.
+        function changeLocation() {
+            var selectedOriginId = $("#originId option:selected").val();
+            var selectedDestinationId = $("#destinationId option:selected").val();
+
+            $('#destinationId').val(selectedOriginId).trigger('change');
+            $('#originId').val(selectedDestinationId).trigger('change');
+        }
+    </script>
+}
